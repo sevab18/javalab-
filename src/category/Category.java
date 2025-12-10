@@ -17,10 +17,15 @@ public class Category {
         this.products = new ArrayList<>();
     }
 
-    public void addProduct(Product product) {
-        if (product != null) {
-            products.add(product);
+    public boolean addProduct(Product product) {
+        if (product == null) {
+            return false;
         }
+        if (products.contains(product)) {
+            return false; // Reject duplicates (same object reference)
+        }
+        products.add(product);
+        return true;
     }
 
     public void removeProduct(Product product) {

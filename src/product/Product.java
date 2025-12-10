@@ -12,49 +12,42 @@ public class Product {
     // stock status is derived from quantity, not a field
 
     public Product(String id, String name, String description, double price, int quantity, Category category) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        if (price >= 0) {
-            this.price = price;
-        } else {
-            this.price = 0;
-            System.out.println("Price cannot be negative. Set to 0.");
-        }
-        if (quantity >= 0) {
-            this.quantity = quantity;
-        } else {
-            this.quantity = 0;
-            System.out.println("Quantity cannot be negative. Set to 0.");
-        }
-        this.category = category;
+        // Initialize with defaults or nulls first, then try to set with provided values
+        this.id = null;
+        this.name = null;
+        this.description = null;
+        this.price = 0.0;
+        this.quantity = 0;
+        this.category = null;
+
+        trySetId(id);
+        trySetName(name);
+        trySetDescription(description);
+        trySetPrice(price);
+        trySetQuantity(quantity);
+        trySetCategory(category);
     }
 
-    public void addStock(int amount) {
+    public boolean addStock(int amount) {
         if (amount > 0) {
-            this.quantity += amount;
-            System.out.println(amount + " items added to stock. New quantity: " + this.quantity);
-        } else {
-            System.out.println("Cannot add a non-positive amount to stock.");
+            return trySetQuantity(this.quantity + amount);
         }
+        return false;
     }
 
-    public void sellProduct(int amount) {
+    public boolean sellProduct(int amount) {
         if (amount > 0 && amount <= this.quantity) {
-            this.quantity -= amount;
-            System.out.println(amount + " items sold. New quantity: " + this.quantity);
-        } else {
-            System.out.println("Sale could not be completed. Check amount or stock level.");
+            return trySetQuantity(this.quantity - amount);
         }
+        return false;
     }
 
-    public void applyDiscount(double percent) {
-        if (percent > 0 && percent <= 100) {
-            this.price -= this.price * (percent / 100.0);
-            System.out.println("Applied " + percent + "% discount. New price: " + this.price);
-        } else {
-            System.out.println("Invalid discount percentage.");
+    public boolean applyDiscount(double percent) {
+        if (percent >= 0 && percent <= 90) { // Discount percentage must be 0..90
+            double newPrice = this.price * (1 - percent / 100.0);
+            return trySetPrice(newPrice);
         }
+        return false;
     }
 
     public double calculateTotalValue() {
@@ -84,6 +77,55 @@ public class Product {
         }
         System.out.println("Stock Status: " + getStockStatus());
         System.out.println("Total Value: " + String.format("%.2f", calculateTotalValue()));
+    }
+
+    // Guarded setters
+    public boolean trySetId(String id) {
+        if (id != null && id.trim().length() >= 2) {
+            this.id = id.trim();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean trySetName(String name) {
+        if (name != null && name.trim().length() >= 2) {
+            this.name = name.trim();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean trySetDescription(String description) {
+        if (description == null || description.trim().length() <= 200) {
+            this.description = (description == null) ? null : description.trim();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean trySetPrice(double price) {
+        if (price >= 0.0 && price <= 1_000_000.0) {
+            this.price = price;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean trySetQuantity(int quantity) {
+        if (quantity >= 0 && quantity <= 1_000_000) {
+            this.quantity = quantity;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean trySetCategory(Category category) {
+        if (category != null) {
+            this.category = category;
+            return true;
+        }
+        return false;
     }
 
     // Getters
